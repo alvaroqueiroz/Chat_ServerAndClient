@@ -1,6 +1,23 @@
 import socket
 import csv
 
+def exclui_sala(addr,connect):
+
+    #pede input ao cliente
+    str_return = ('11')
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
+
+    str_return = "Digite o nome da sala a ser excluido"
+
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
+
+    nomesaladel, temp = connect.recvfrom(1024)
+
+    salaindex = salas.index(nomesaladel.decode('utf-8'))
+    del salas[salaindex]
+
+    mainmenu(addr,connect)
+
 def lista_salas(addr,connect):
 
     #avisa output ao cliente
@@ -117,7 +134,7 @@ def mainmenu(addr,connect):
     str_return = ('11')
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
-    str_return = "Bem vindo ao chat, escolha a opcao desejada:\n 1 - Registrar\n 2 - Entrar\n 3 - Criar sala de bate papo\n 4 - Listar salas abertas\n"
+    str_return = "Bem vindo ao chat, escolha a opcao desejada:\n 1 - Registrar\n 2 - Entrar\n 3 - Criar sala de bate papo\n 4 - Listar salas abertas\n 5 - Excluir sala"
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_recv, temp = connect.recvfrom(1024)
@@ -134,6 +151,9 @@ def mainmenu(addr,connect):
 
     if(str_recv == '4'):
         lista_salas(addr,connect)
+
+    if(str_recv == '5'):
+        exclui_sala(addr,connect)
 
 
 
