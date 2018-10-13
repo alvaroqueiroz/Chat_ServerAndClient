@@ -2,17 +2,25 @@ import socket
 import csv
 
 def lista_salas(addr,connect):
-    str_return = "Salas abertas :"
+
+    #avisa output ao cliente
+    str_return = ('11')
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
-    salasresp = (','.join(salas)+'\n')
-
-    str_return = salasresp
+    #envia output ao cliente
+    
+    salasresp = (','.join(salas)+'\n') 
+    str_return = ('Salas abertas :'+salasresp)
     connect.sendto(bytes(str_return, 'utf-8'), addr)
+
     mainmenu(addr,connect)
 
 
 def cria_sala(addr,connect):
+
+    #pede input ao cliente
+    str_return = ('11')
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_return = "Digite o nome desejado para a nova sala"
     connect.sendto(bytes(str_return, 'utf-8'), addr)
@@ -21,11 +29,15 @@ def cria_sala(addr,connect):
 
     salas.append(nomesala.decode('utf-8'))
 
-    lista_salas(addr,connect)
+    mainmenu(addr,connect)
 
 
 
 def registrar_usuario(addr,connect):
+
+    #pede input ao cliente
+    str_return = ('01')
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_return = "Digite o nome do usuario e senha"
     connect.sendto(bytes(str_return, 'utf-8'), addr)
@@ -36,15 +48,16 @@ def registrar_usuario(addr,connect):
 
     #abrir arquivo csv que contem todos as credenciais
 
-    with open('usuarios.csv','a') as usuarios:
-        thewriter = csv.writer(usuarios)
-        thewriter.writerow([nomeusuario.decode('utf-8'),senhausuario.decode('utf-8'),addr])
 
-    #guardar usuario e senha em csv
+    writer = csv.writer(open('usuarios.csv', 'a'))
+    writer.writerow([nomeusuario.decode('utf-8'),senhausuario.decode('utf-8'),addr])
     mainmenu(addr,connect)
 
-
 def usuario_entrar(addr,connect):
+
+    #pede input ao cliente
+    str_return = ('01')
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_return = "Digite o nome do seu usuario e senha"
     connect.sendto(bytes(str_return, 'utf-8'), addr)
@@ -99,6 +112,11 @@ def main():
         connect.close()
 
 def mainmenu(addr,connect):
+
+    #pede input ao cliente
+    str_return = ('11')
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
+
     str_return = "Bem vindo ao chat, escolha a opcao desejada:\n 1 - Registrar\n 2 - Entrar\n 3 - Criar sala de bate papo\n 4 - Listar salas abertas\n"
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
@@ -116,6 +134,7 @@ def mainmenu(addr,connect):
 
     if(str_recv == '4'):
         lista_salas(addr,connect)
+
 
 
 
