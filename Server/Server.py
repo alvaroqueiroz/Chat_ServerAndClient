@@ -1,7 +1,31 @@
 import socket
 import csv
 
-def registrar(addr):
+def lista_salas(addr,connect):
+    str_return = "Salas abertas :"
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
+
+    salasresp = (','.join(salas)+'\n')
+
+    str_return = salasresp
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
+    mainmenu(addr,connect)
+
+
+def cria_sala(addr,connect):
+
+    str_return = "Digite o nome desejado para a nova sala"
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
+
+    nomesala, temp = connect.recvfrom(1024)
+
+    salas.append(nomesala.decode('utf-8'))
+
+    lista_salas(addr,connect)
+
+
+
+def registrar_usuario(addr,connect):
 
     str_return = "Digite o nome do usuario e senha"
     connect.sendto(bytes(str_return, 'utf-8'), addr)
@@ -17,8 +41,10 @@ def registrar(addr):
         thewriter.writerow([nomeusuario.decode('utf-8'),senhausuario.decode('utf-8'),addr])
 
     #guardar usuario e senha em csv
+    mainmenu(addr,connect)
 
-def entrar(addr):
+
+def usuario_entrar(addr,connect):
 
     str_return = "Digite o nome do seu usuario e senha"
     connect.sendto(bytes(str_return, 'utf-8'), addr)
@@ -36,11 +62,7 @@ def entrar(addr):
         usersenhas = []
         userips = []
 
-
-
         for row in reader:
-
-
             user = row[0]
             usersenha = row[1]
             userip = row[2]
@@ -61,44 +83,45 @@ def entrar(addr):
             for i in range(len(users)):
                 writer.writerow([users[i],usersenhas[i],userips[i]])
                 
-                
-
-
         else:
             str_return = ('Senha incorreta, programa encerrado')
             connect.sendto(bytes(str_return, 'utf-8'), addr)
+    mainmenu(addr,connect)
 
+def main():
+    while True:
 
+        connect, addr = s.accept()
+        print("Conexão recebida :" + str(addr))
 
+        mainmenu(addr,connect)
 
+        connect.close()
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('localhost', 3333))
-s.listen(5)
-
-
-while True:
-    connect, addr = s.accept()
-    print("Conexão recebida :" + str(addr))
-
-    str_return = "Bem vindo ao chat, escolha a opcao desejada:\n 1 - Registrar\n 2 - Entrar\n 3 - entrar em sala"
+def mainmenu(addr,connect):
+    str_return = "Bem vindo ao chat, escolha a opcao desejada:\n 1 - Registrar\n 2 - Entrar\n 3 - Criar sala de bate papo\n 4 - Listar salas abertas\n"
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_recv, temp = connect.recvfrom(1024)
     str_recv = str_recv.decode('utf-8')
 
     if(str_recv == '1'):
-        registrar(addr)
+        registrar_usuario(addr,connect)
 
     if(str_recv == '2'):
-        entrar(addr)
+        usuario_entrar(addr,connect)
+
+    if(str_recv == '3'):
+        cria_sala(addr,connect)
+
+    if(str_recv == '4'):
+        lista_salas(addr,connect)
 
 
-    #str_recv, temp = connect.recvfrom(1024)
-    #print(str_recv)
 
-    #str_return = "I got your command, it is " + str(str_recv)
-    #connect.sendto(bytes(str_return, 'utf-8'), addr)
-
-    connect.close()
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind(('localhost', 3333))
+s.listen(5)
+salas = []
+main()
 

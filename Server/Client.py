@@ -19,12 +19,16 @@ print((str_recv).decode('utf-8'))
 str_send = input()
 s.send(bytes(str_send, 'utf-8'))
 
-str_send = input()
-s.send(bytes(str_send, 'utf-8'))
+#str_send = input()
+#s.send(bytes(str_send, 'utf-8'))
 
 str_recv = s.recv(1024)
 print((str_recv).decode('utf-8'))
 
+str_recv = s.recv(1024)
+print((str_recv).decode('utf-8'))
 
+str_recv = s.recv(1024)
+print((str_recv).decode('utf-8'))
 
 s.close()
