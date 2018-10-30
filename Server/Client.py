@@ -1,15 +1,14 @@
+import socket
+from threading import Thread
 
 
 def main():
-
-
-
     while True:
 
-        #ve se o servidor quer input ou output
+        # ve se o servidor quer input ou output
         str_recv = s.recv(1024)
 
-        #11 para input 00 para output do servidor
+        # 11 para input 00 para output do servidor
 
         if str_recv.decode('utf-8') == '11':
             input_data()
@@ -24,50 +23,43 @@ def main():
             entrar_sala()
 
 
-         
-
-
-
 def input_login():
-
-
     str_recv = s.recv(1024)
-    print((str_recv).decode('utf-8'))
+    print(str_recv.decode('utf-8'))
 
     str_send = input()
     s.send(bytes(str_send, 'utf-8'))
 
     str_send = input()
     s.send(bytes(str_send, 'utf-8'))
+
 
 def input_data():
-
-
     str_recv = s.recv(1024)
-    print((str_recv).decode('utf-8'))
+    print(str_recv.decode('utf-8'))
 
     str_send = input()
     s.send(bytes(str_send, 'utf-8'))
- 
-    
+
+
 def output_data():
-    
     str_recv = s.recv(1024)
-    print((str_recv).decode('utf-8'))
+    print(str_recv.decode('utf-8'))
+
 
 def tenviafunc():
     while True:
         str_send = input()
         s.send(bytes(str_send, 'utf-8'))
 
-def trecebefunc():
 
+def trecebefunc():
     while True:
         str_recv = s.recv(1024)
-        print((str_recv).decode('utf-8'))
+        print(str_recv.decode('utf-8'))
+
 
 def entrar_sala():
-
     trds = []
 
     tenvia = Thread(target=tenviafunc)
@@ -78,19 +70,14 @@ def entrar_sala():
     trds.append(trecebe)
     trecebe.start()
 
-
     tenvia.join()
     trecebe.join()
 
- 
 
-
-import socket
-from threading import Thread
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(('192.168.15.181', 3333))
+s.connect(('192.168.25.10', 3333))
 
 str_recv = s.recv(1024)
-print((str_recv).decode('utf-8'))
+print(str_recv.decode('utf-8'))
 
 main()

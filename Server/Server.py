@@ -221,7 +221,7 @@ def mainmenu(addr, connect):
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('192.168.15.181', 3333))
+s.bind(('192.168.25.10', 3333))
 s.listen(5)
 salas = []
 main()
