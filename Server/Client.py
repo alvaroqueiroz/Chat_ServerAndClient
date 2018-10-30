@@ -2,6 +2,8 @@
 
 def main():
 
+
+
     while True:
 
         #ve se o servidor quer input ou output
@@ -17,6 +19,9 @@ def main():
 
         elif str_recv.decode('utf-8') == '01':
             input_login()
+
+        elif str_recv.decode('utf-8') == '111':
+            entrar_sala()
 
 
          
@@ -50,11 +55,42 @@ def output_data():
     str_recv = s.recv(1024)
     print((str_recv).decode('utf-8'))
 
+def tenviafunc():
+    while True:
+        str_send = input()
+        s.send(bytes(str_send, 'utf-8'))
+
+def trecebefunc():
+
+    while True:
+        str_recv = s.recv(1024)
+        print((str_recv).decode('utf-8'))
+
+def entrar_sala():
+
+    trds = []
+
+    tenvia = Thread(target=tenviafunc)
+    trds.append(tenvia)
+    tenvia.start()
+
+    trecebe = Thread(target=trecebefunc)
+    trds.append(trecebe)
+    trecebe.start()
+
+
+    tenvia.join()
+    trecebe.join()
+
  
 
 
 import socket
+from threading import Thread
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(("localhost", 3333))
+s.connect(('192.168.15.181', 3333))
+
+str_recv = s.recv(1024)
+print((str_recv).decode('utf-8'))
 
 main()

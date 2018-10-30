@@ -1,9 +1,59 @@
 import socket
 import csv
+from threading import Thread
 
-def exclui_sala(addr,connect):
 
-    #pede input ao cliente
+def entra_sala_publica(addr, connect):
+    global clientscon
+    global clientsaddr
+
+    # pede input ao cliente
+    str_return = ('11')
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
+
+    str_return = "Qual o seu nome?"
+
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
+
+    nomeuser, temp = connect.recvfrom(1024)
+
+    # pede input ao cliente
+    str_return = ('111')
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
+
+    while True:
+        msg, temp = connect.recvfrom(1024)
+
+        msg = str(nomeuser.decode('utf-8')) + ' :' + msg.decode('utf-8')
+
+        for i in range(len(clientsaddr)):
+            clientscon[i].sendto(bytes(msg, 'utf-8'), clientsaddr[i])
+
+    mainmenu(addr, connect)
+
+
+def entra_sala(addr, connect):
+    global clientscon
+    global clientsaddr
+
+
+    # pede input ao cliente
+    str_return = ('111')
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
+
+    while True:
+        msg, temp = connect.recvfrom(1024)
+
+        msg = str(addr) + ' :' + msg.decode('utf-8')
+
+        for i in range(len(clientsaddr)):
+            clientscon[i].sendto(bytes(msg, 'utf-8'), clientsaddr[i])
+
+    mainmenu(addr, connect)
+
+
+def exclui_sala(addr, connect):
+    # pede input ao cliente
     str_return = ('11')
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
@@ -16,26 +66,25 @@ def exclui_sala(addr,connect):
     salaindex = salas.index(nomesaladel.decode('utf-8'))
     del salas[salaindex]
 
-    mainmenu(addr,connect)
+    mainmenu(addr, connect)
 
-def lista_salas(addr,connect):
 
-    #avisa output ao cliente
+def lista_salas(addr, connect):
+    # avisa output ao cliente
     str_return = ('11')
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
-    #envia output ao cliente
-    
-    salasresp = (','.join(salas)+'\n') 
-    str_return = ('Salas abertas :'+salasresp)
+    # envia output ao cliente
+
+    salasresp = (','.join(salas) + '\n')
+    str_return = ('Salas abertas :' + salasresp)
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
-    mainmenu(addr,connect)
+    mainmenu(addr, connect)
 
 
-def cria_sala(addr,connect):
-
-    #pede input ao cliente
+def cria_sala(addr, connect):
+    # pede input ao cliente
     str_return = ('11')
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
@@ -46,121 +95,133 @@ def cria_sala(addr,connect):
 
     salas.append(nomesala.decode('utf-8'))
 
-    mainmenu(addr,connect)
+    mainmenu(addr, connect)
 
 
-
-def registrar_usuario(addr,connect):
-
-    #pede input ao cliente
+def registrar_usuario(addr, connect):
+    # pede input ao cliente
     str_return = ('01')
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_return = "Digite o nome do usuario e senha"
     connect.sendto(bytes(str_return, 'utf-8'), addr)
-    
-    #receber nome e senha do usuario
+
+    # receber nome e senha do usuario
     nomeusuario, temp = connect.recvfrom(1024)
     senhausuario, temp = connect.recvfrom(1024)
 
-    #abrir arquivo csv que contem todos as credenciais
-
+    # abrir arquivo csv que contem todos as credenciais
 
     writer = csv.writer(open('usuarios.csv', 'a'))
-    writer.writerow([nomeusuario.decode('utf-8'),senhausuario.decode('utf-8'),addr])
-    mainmenu(addr,connect)
+    writer.writerow([nomeusuario.decode('utf-8'), senhausuario.decode('utf-8'), addr])
 
-def usuario_entrar(addr,connect):
+    mainmenu(addr, connect)
 
-    #pede input ao cliente
+
+def usuario_entrar(addr, connect):
+    # pede input ao cliente
     str_return = ('01')
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_return = "Digite o nome do seu usuario e senha"
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
-    #receber nome e senha do usuario
+    # receber nome e senha do usuario
     nomeusuario, temp = connect.recvfrom(1024)
     senhausuario, temp = connect.recvfrom(1024)
 
-    #verificar credenciais
+    # verificar credenciais
 
-    with open('usuarios.csv') as usuarios:
-        reader = csv.reader(usuarios, delimiter=',',quotechar='"')
-    # estruturas de dados para guardar os dados
+    with open('usuarios.csv', 'r') as usuarios:
+        reader = csv.reader(usuarios, delimiter=',', quotechar='"')
+        # estruturas de dados para guardar os dados
         users = []
         usersenhas = []
         userips = []
 
         for row in reader:
-            user = row[0]
-            usersenha = row[1]
-            userip = row[2]
-
-            users.append(user)
-            usersenhas.append(usersenha)
-            userips.append(userip)
+            users.append(row[0])
+            usersenhas.append(row[1])
+            userips.append(row[2])
 
         userindex = users.index(nomeusuario.decode('utf-8'))
 
         if senhausuario.decode('utf-8') == usersenhas[userindex]:
-            str_return = ('Bem vindo '+(nomeusuario.decode('utf-8')))
+            str_return = ('Bem vindo ' + (nomeusuario.decode('utf-8')))
             connect.sendto(bytes(str_return, 'utf-8'), addr)
 
             userips[userindex] = addr
 
             writer = csv.writer(open('usuarios.csv', 'w'))
             for i in range(len(users)):
-                writer.writerow([users[i],usersenhas[i],userips[i]])
-                
+                writer.writerow([users[i], usersenhas[i], userips[i]])
+
         else:
             str_return = ('Senha incorreta, programa encerrado')
             connect.sendto(bytes(str_return, 'utf-8'), addr)
-    mainmenu(addr,connect)
+    mainmenu(addr, connect)
+
 
 def main():
-    while True:
+    global clientscon
+    global clientsaddr
 
+    trds = []
+    clientscon = []
+    clientsaddr = []
+
+    for i in range(5):
         connect, addr = s.accept()
         print("Conexão recebida :" + str(addr))
 
-        mainmenu(addr,connect)
+        str_return = "Bem vindo a esta porra de chat"
+        connect.sendto(bytes(str_return, 'utf-8'), addr)
+        clientscon.append(connect)
+        clientsaddr.append(addr)
+        t = Thread(target=mainmenu, args=(addr, connect))
+        trds.append(t)
+        t.start()
 
-        connect.close()
+    for t in trds:
+        t.join()
+    connect.close()
 
-def mainmenu(addr,connect):
 
-    #pede input ao cliente
+def mainmenu(addr, connect):
+    # pede input ao cliente
     str_return = ('11')
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
-    str_return = "Bem vindo ao chat, escolha a opcao desejada:\n 1 - Registrar\n 2 - Entrar\n 3 - Criar sala de bate papo\n 4 - Listar salas abertas\n 5 - Excluir sala"
+    str_return = "Menu de opcoes :\n 1 - Registrar\n 2 - Entrar\n 3 - Criar sala de bate papo\n 4 - Listar salas abertas\n 5 - Excluir sala\n 6 - Entrar em sala\n 7 - Entrar em sala publica"
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_recv, temp = connect.recvfrom(1024)
     str_recv = str_recv.decode('utf-8')
 
-    if(str_recv == '1'):
-        registrar_usuario(addr,connect)
+    if (str_recv == '1'):
+        registrar_usuario(addr, connect)
 
-    if(str_recv == '2'):
-        usuario_entrar(addr,connect)
+    if (str_recv == '2'):
+        usuario_entrar(addr, connect)
 
-    if(str_recv == '3'):
-        cria_sala(addr,connect)
+    if (str_recv == '3'):
+        cria_sala(addr, connect)
 
-    if(str_recv == '4'):
-        lista_salas(addr,connect)
+    if (str_recv == '4'):
+        lista_salas(addr, connect)
 
-    if(str_recv == '5'):
-        exclui_sala(addr,connect)
+    if (str_recv == '5'):
+        exclui_sala(addr, connect)
 
+    if (str_recv == '6'):
+        entra_sala(addr, connect)
 
+    if (str_recv == '7'):
+        entra_sala_publica(addr, connect)
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('localhost', 3333))
+s.bind(('192.168.15.181', 3333))
 s.listen(5)
 salas = []
 main()
-
