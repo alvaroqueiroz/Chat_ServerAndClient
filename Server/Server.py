@@ -36,7 +36,6 @@ def entra_sala(addr, connect):
     global clientscon
     global clientsaddr
 
-
     # pede input ao cliente
     str_return = ('111')
     connect.sendto(bytes(str_return, 'utf-8'), addr)
@@ -100,7 +99,7 @@ def cria_sala(addr, connect):
 
 def registrar_usuario(addr, connect):
     # pede input ao cliente
-    str_return = ('01')
+    str_return = '01'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_return = "Digite o nome do usuario e senha"
@@ -120,7 +119,7 @@ def registrar_usuario(addr, connect):
 
 def usuario_entrar(addr, connect):
     # pede input ao cliente
-    str_return = ('01')
+    str_return = '01'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_return = "Digite o nome do seu usuario e senha"
@@ -157,7 +156,7 @@ def usuario_entrar(addr, connect):
                 writer.writerow([users[i], usersenhas[i], userips[i]])
 
         else:
-            str_return = ('Senha incorreta, programa encerrado')
+            str_return = 'Senha incorreta, programa encerrado'
             connect.sendto(bytes(str_return, 'utf-8'), addr)
     mainmenu(addr, connect)
 
@@ -192,31 +191,32 @@ def mainmenu(addr, connect):
     str_return = ('11')
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
-    str_return = "Menu de opcoes :\n 1 - Registrar\n 2 - Entrar\n 3 - Criar sala de bate papo\n 4 - Listar salas abertas\n 5 - Excluir sala\n 6 - Entrar em sala\n 7 - Entrar em sala publica"
+    str_return = "Menu de opcoes :\n 1 - Registrar\n 2 - Entrar\n 3 - Criar sala de bate papo\n 4 - Listar salas " \
+                 "abertas\n 5 - Excluir sala\n 6 - Entrar em sala\n 7 - Entrar em sala publica "
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_recv, temp = connect.recvfrom(1024)
     str_recv = str_recv.decode('utf-8')
 
-    if (str_recv == '1'):
+    if str_recv == '1':
         registrar_usuario(addr, connect)
 
-    if (str_recv == '2'):
+    if str_recv == '2':
         usuario_entrar(addr, connect)
 
-    if (str_recv == '3'):
+    if str_recv == '3':
         cria_sala(addr, connect)
 
-    if (str_recv == '4'):
+    if str_recv == '4':
         lista_salas(addr, connect)
 
-    if (str_recv == '5'):
+    if str_recv == '5':
         exclui_sala(addr, connect)
 
-    if (str_recv == '6'):
+    if str_recv == '6':
         entra_sala(addr, connect)
 
-    if (str_recv == '7'):
+    if str_recv == '7':
         entra_sala_publica(addr, connect)
 
 
