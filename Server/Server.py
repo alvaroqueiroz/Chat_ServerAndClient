@@ -8,7 +8,7 @@ def entra_sala_publica(addr, connect):
     global clientsaddr
 
     # pede input ao cliente
-    str_return = ('11')
+    str_return = '11'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_return = "Qual o seu nome?"
@@ -18,7 +18,7 @@ def entra_sala_publica(addr, connect):
     nomeuser, temp = connect.recvfrom(1024)
 
     # pede input ao cliente
-    str_return = ('111')
+    str_return = '111'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     while True:
@@ -37,7 +37,7 @@ def entra_sala(addr, connect):
     global clientsaddr
 
     # pede input ao cliente
-    str_return = ('111')
+    str_return = '111'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     while True:
@@ -53,7 +53,7 @@ def entra_sala(addr, connect):
 
 def exclui_sala(addr, connect):
     # pede input ao cliente
-    str_return = ('11')
+    str_return = '11'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_return = "Digite o nome da sala a ser excluido"
@@ -70,7 +70,7 @@ def exclui_sala(addr, connect):
 
 def lista_salas(addr, connect):
     # avisa output ao cliente
-    str_return = ('11')
+    str_return = '11'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     # envia output ao cliente
@@ -84,7 +84,7 @@ def lista_salas(addr, connect):
 
 def cria_sala(addr, connect):
     # pede input ao cliente
-    str_return = ('11')
+    str_return = '11'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_return = "Digite o nome desejado para a nova sala"
@@ -114,6 +114,8 @@ def registrar_usuario(addr, connect):
     writer = csv.writer(open('usuarios.csv', 'a'))
     writer.writerow([nomeusuario.decode('utf-8'), senhausuario.decode('utf-8'), addr])
 
+    UsersList.append([nomeusuario,senhausuario,addr])
+
     mainmenu(addr, connect)
 
 
@@ -128,6 +130,28 @@ def usuario_entrar(addr, connect):
     # receber nome e senha do usuario
     nomeusuario, temp = connect.recvfrom(1024)
     senhausuario, temp = connect.recvfrom(1024)
+
+    str_return = '11'
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
+
+    pos = 0
+
+    for i in range(len(UsersList)):
+        if UsersList[i][0] == nomeusuario:
+            pos = i
+            break
+
+    if UsersList[pos][1] == senhausuario:
+
+        str_return = ('Bem vindo ' + (nomeusuario.decode('utf-8')))
+        connect.sendto(bytes(str_return, 'utf-8'), addr)
+
+    else:
+        str_return = 'Senha incorreta, programa encerrado'
+        connect.sendto(bytes(str_return, 'utf-8'), addr)
+
+    mainmenu(addr, connect)
+    '''
 
     # verificar credenciais
 
@@ -158,16 +182,20 @@ def usuario_entrar(addr, connect):
         else:
             str_return = 'Senha incorreta, programa encerrado'
             connect.sendto(bytes(str_return, 'utf-8'), addr)
-    mainmenu(addr, connect)
+            
+            '''
+
 
 
 def main():
     global clientscon
     global clientsaddr
+    global UsersList
 
     trds = []
     clientscon = []
     clientsaddr = []
+    UsersList = []
 
     for i in range(5):
         connect, addr = s.accept()
@@ -188,7 +216,7 @@ def main():
 
 def mainmenu(addr, connect):
     # pede input ao cliente
-    str_return = ('11')
+    str_return = '11'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_return = "Menu de opcoes :\n 1 - Registrar\n 2 - Entrar\n 3 - Criar sala de bate papo\n 4 - Listar salas " \
