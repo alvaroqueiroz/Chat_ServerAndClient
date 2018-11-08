@@ -27,12 +27,19 @@ def entra_sala_publica(addr, connect):
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     while True:
-        msg, temp = connect.recvfrom(1024)
 
-        msg = str(nomeuser.decode('utf-8')) + ' :' + msg.decode('utf-8')
+        msg, temp = connect.recvfrom(16384)
+        brodcastmsg = str(nomeuser.decode('utf-8')) + ' :' + msg.decode('utf-8')
 
-        for i in range(len(clientsaddr)):
-            clientscon[i].sendto(bytes(msg, 'utf-8'), clientsaddr[i])
+        if "Send :" in brodcastmsg:
+            for i in range(len(clientsaddr)):
+                clientscon[i].sendto(bytes(msg.decode('utf-8'), 'utf-8'), clientsaddr[i])
+        else:
+            for i in range(len(clientsaddr)):
+                clientscon[i].sendto(bytes(brodcastmsg, 'utf-8'), clientsaddr[i])
+
+
+
 
     mainmenu(addr, connect)
 
