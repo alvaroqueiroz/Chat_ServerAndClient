@@ -75,7 +75,7 @@ def entrar_sala():
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(('192.168.25.10', 3333))
+s.connect(('192.168.25.5', 3333))
 
 str_recv = s.recv(1024)
 print(str_recv.decode('utf-8'))

@@ -1,6 +1,7 @@
 import socket
 import csv
 from threading import Thread
+import datetime
 
 
 def entra_sala_publica(addr, connect):
@@ -16,6 +17,10 @@ def entra_sala_publica(addr, connect):
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     nomeuser, temp = connect.recvfrom(1024)
+
+    writerlog = csv.writer(open('log.csv', 'a'))
+    now = datetime.datetime.now()
+    writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" :Ausuário entrou na sala pública :" + nomeuser.decode('utf-8')])
 
     # pede input ao cliente
     str_return = '111'
@@ -37,13 +42,27 @@ def entra_sala(addr, connect):
     global clientsaddr
 
     # pede input ao cliente
-    str_return = '111'
+    str_return = '11'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
+
+    str_return = "Digite o nome da sala em que deseja entrar"
+
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
+
+    nomesala, temp = connect.recvfrom(1024)
+
+    pos = 0
+
+    for i in range(len(UsersList)):
+        if UsersList[i][2] == addr:
+            pos = i
+
+    UsersList[pos][3] = nomesala
 
     while True:
         msg, temp = connect.recvfrom(1024)
 
-        msg = str(addr) + ' :' + msg.decode('utf-8')
+        msg = str(UsersList[pos][0]) + ' :' + msg.decode('utf-8')
 
         for i in range(len(clientsaddr)):
             clientscon[i].sendto(bytes(msg, 'utf-8'), clientsaddr[i])
@@ -56,7 +75,7 @@ def exclui_sala(addr, connect):
     str_return = '11'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
-    str_return = "Digite o nome da sala a ser excluido"
+    str_return = "Digite o nome da sala a ser excluida"
 
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
@@ -64,6 +83,10 @@ def exclui_sala(addr, connect):
 
     salaindex = salas.index(nomesaladel.decode('utf-8'))
     del salas[salaindex]
+
+    writerlog = csv.writer(open('log.csv', 'a'))
+    now = datetime.datetime.now()
+    writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Sala Excluida :" + nomesaladel.decode('utf-8')])
 
     mainmenu(addr, connect)
 
@@ -94,6 +117,10 @@ def cria_sala(addr, connect):
 
     salas.append(nomesala.decode('utf-8'))
 
+    writerlog = csv.writer(open('log.csv', 'a'))
+    now = datetime.datetime.now()
+    writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Sala Criada :" + nomesala.decode('utf-8')])
+
     mainmenu(addr, connect)
 
 
@@ -114,7 +141,11 @@ def registrar_usuario(addr, connect):
     writer = csv.writer(open('usuarios.csv', 'a'))
     writer.writerow([nomeusuario.decode('utf-8'), senhausuario.decode('utf-8'), addr])
 
-    UsersList.append([nomeusuario,senhausuario,addr])
+    UsersList.append([nomeusuario, senhausuario, addr, 'sala0'])
+
+    writerlog = csv.writer(open('log.csv', 'a'))
+    now = datetime.datetime.now()
+    writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Usuario Registrado :" + nomeusuario.decode('utf-8')])
 
     mainmenu(addr, connect)
 
@@ -149,6 +180,10 @@ def usuario_entrar(addr, connect):
     else:
         str_return = 'Senha incorreta, programa encerrado'
         connect.sendto(bytes(str_return, 'utf-8'), addr)
+
+    writerlog = csv.writer(open('log.csv', 'a'))
+    now = datetime.datetime.now()
+    writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Login de usuario :" + nomeusuario.decode('utf-8')])
 
     mainmenu(addr, connect)
     '''
@@ -186,20 +221,26 @@ def usuario_entrar(addr, connect):
             '''
 
 
-
 def main():
     global clientscon
     global clientsaddr
     global UsersList
+    global salas
 
     trds = []
     clientscon = []
     clientsaddr = []
     UsersList = []
 
+    # Abrir arquivo para escrever logs
+    writerlog = csv.writer(open('log.csv', 'a'))
+
     for i in range(5):
         connect, addr = s.accept()
         print("Conexão recebida :" + str(addr))
+
+        now = datetime.datetime.now()
+        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" :Conexão recebida :" + str(addr)])
 
         str_return = "Bem vindo a esta porra de chat"
         connect.sendto(bytes(str_return, 'utf-8'), addr)
@@ -249,7 +290,7 @@ def mainmenu(addr, connect):
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('192.168.25.10', 3333))
+s.bind(('192.168.25.5', 3333))
 s.listen(5)
 salas = []
 main()
