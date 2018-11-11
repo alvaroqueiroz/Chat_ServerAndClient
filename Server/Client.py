@@ -65,8 +65,8 @@ def trecebefunc():
         str_recv = s.recv(1024).decode('utf-8')
 
         if "Send :" in str_recv:
-            filew = open("Received.txt","w")
-            filew.write(str_recv[6:])
+            with open("Received.txt","w") as filew:
+                filew.write(str_recv[6:])
 
         else:
             print(str_recv)
@@ -88,7 +88,7 @@ def entrar_sala():
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(('192.168.25.5', 3333))
+s.connect(('192.168.15.181', 3333))
 
 str_recv = s.recv(1024)
 print(str_recv.decode('utf-8'))

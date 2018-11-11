@@ -18,9 +18,10 @@ def entra_sala_publica(addr, connect):
 
     nomeuser, temp = connect.recvfrom(1024)
 
-    writerlog = csv.writer(open('log.csv', 'a'))
     now = datetime.datetime.now()
-    writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" :Ausuário entrou na sala pública :" + nomeuser.decode('utf-8')])
+    with open('log.csv', 'a') as log:
+        writerlog = csv.writer(log)
+        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" :Ausuário entrou na sala pública :" + nomeuser.decode('utf-8')])
 
     # pede input ao cliente
     str_return = '111'
@@ -91,9 +92,10 @@ def exclui_sala(addr, connect):
     salaindex = salas.index(nomesaladel.decode('utf-8'))
     del salas[salaindex]
 
-    writerlog = csv.writer(open('log.csv', 'a'))
     now = datetime.datetime.now()
-    writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Sala Excluida :" + nomesaladel.decode('utf-8')])
+    with open('log.csv', 'a') as log:
+        writerlog = csv.writer(log)
+        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Sala Excluida :" + nomesaladel.decode('utf-8')])
 
     mainmenu(addr, connect)
 
@@ -124,9 +126,10 @@ def cria_sala(addr, connect):
 
     salas.append(nomesala.decode('utf-8'))
 
-    writerlog = csv.writer(open('log.csv', 'a'))
     now = datetime.datetime.now()
-    writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Sala Criada :" + nomesala.decode('utf-8')])
+    with open('log.csv', 'a') as log:
+        writerlog = csv.writer(log)
+        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Sala Criada :" + nomesala.decode('utf-8')])
 
     mainmenu(addr, connect)
 
@@ -145,14 +148,16 @@ def registrar_usuario(addr, connect):
 
     # abrir arquivo csv que contem todos as credenciais
 
-    writer = csv.writer(open('usuarios.csv', 'a'))
-    writer.writerow([nomeusuario.decode('utf-8'), senhausuario.decode('utf-8'), addr])
+    with open('usuarios.csv', 'a') as usuarios:
+        writer = csv.writer(usuarios)
+        writer.writerow([nomeusuario.decode('utf-8'), senhausuario.decode('utf-8'), addr])
 
     UsersList.append([nomeusuario, senhausuario, addr, 'sala0'])
 
-    writerlog = csv.writer(open('log.csv', 'a'))
     now = datetime.datetime.now()
-    writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Usuario Registrado :" + nomeusuario.decode('utf-8')])
+    with open('log.csv', 'a') as log:
+        writerlog = csv.writer(log)
+        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Usuario Registrado :" + nomeusuario.decode('utf-8')])
 
     mainmenu(addr, connect)
 
@@ -188,9 +193,10 @@ def usuario_entrar(addr, connect):
         str_return = 'Senha incorreta, programa encerrado'
         connect.sendto(bytes(str_return, 'utf-8'), addr)
 
-    writerlog = csv.writer(open('log.csv', 'a'))
     now = datetime.datetime.now()
-    writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Login de usuario :" + nomeusuario.decode('utf-8')])
+    with open('log.csv', 'a') as log:
+        writerlog = csv.writer(log)
+        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Login de usuario :" + nomeusuario.decode('utf-8')])
 
     mainmenu(addr, connect)
     '''
@@ -239,15 +245,15 @@ def main():
     clientsaddr = []
     UsersList = []
 
-    # Abrir arquivo para escrever logs
-    writerlog = csv.writer(open('log.csv', 'a'))
-
     for i in range(5):
         connect, addr = s.accept()
         print("Conexão recebida :" + str(addr))
 
         now = datetime.datetime.now()
-        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" :Conexão recebida :" + str(addr)])
+
+        with open('log.csv', 'a') as log:
+            writerlog = csv.writer(log)
+            writerlog.writerow([now.strftime("%Y-%m-%d %H:%M") + " :Conexão recebida :" + str(addr)])
 
         str_return = "Bem vindo a esta porra de chat"
         connect.sendto(bytes(str_return, 'utf-8'), addr)
@@ -297,7 +303,7 @@ def mainmenu(addr, connect):
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('192.168.25.5', 3333))
+s.bind(('192.168.15.181', 3333))
 s.listen(5)
 salas = []
 main()
