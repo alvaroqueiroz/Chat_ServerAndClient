@@ -16,12 +16,15 @@ def entra_sala_publica(addr, connect):
 
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
+    salapublica.append([addr, connect])
+
     nomeuser, temp = connect.recvfrom(1024)
 
     now = datetime.datetime.now()
     with open('log.csv', 'a') as log:
         writerlog = csv.writer(log)
-        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" :Ausuário entrou na sala pública :" + nomeuser.decode('utf-8')])
+        writerlog.writerow(
+            [now.strftime("%Y-%m-%d %H:%M") + " :Ausuário entrou na sala pública :" + nomeuser.decode('utf-8')])
 
     # pede input ao cliente
     str_return = '111'
@@ -33,19 +36,16 @@ def entra_sala_publica(addr, connect):
         brodcastmsg = str(nomeuser.decode('utf-8')) + ' :' + msg.decode('utf-8')
 
         if "Send :" in brodcastmsg:
-            for i in range(len(clientsaddr)):
-                clientscon[i].sendto(bytes(msg.decode('utf-8'), 'utf-8'), clientsaddr[i])
+            for i in range(len(salapublica)):
+                salapublica[i][1].sendto(bytes(msg.decode('utf-8'), 'utf-8'), salapublica[i][0])
         else:
-            for i in range(len(clientsaddr)):
-                clientscon[i].sendto(bytes(brodcastmsg, 'utf-8'), clientsaddr[i])
-
-
-
+            for i in range(len(salapublica)):
+                salapublica[i][1].sendto(bytes(brodcastmsg, 'utf-8'), salapublica[i][0])
 
     mainmenu(addr, connect)
 
 
-def entra_sala(addr, connect):
+def entra_sala(addr, connect, user):
     global clientscon
     global clientsaddr
 
@@ -59,21 +59,33 @@ def entra_sala(addr, connect):
 
     nomesala, temp = connect.recvfrom(1024)
 
-    pos = 0
+    salaindex = salas.index(nomesala.decode('utf-8'))
 
-    for i in range(len(UsersList)):
-        if UsersList[i][2] == addr:
-            pos = i
+    salas[salaindex] = []
 
-    UsersList[pos][3] = nomesala
+    salas[salaindex].append([connect, addr, user])
+
+    now = datetime.datetime.now()
+    with open('log.csv', 'a') as log:
+        writerlog = csv.writer(log)
+        writerlog.writerow(
+            [now.strftime("%Y-%m-%d %H:%M") + " :Ausuário entrou na sala " + nomesala.decode('utf-8') + " : " + user])
+
+    # pede input ao cliente
+    str_return = '111'
+    connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     while True:
-        msg, temp = connect.recvfrom(1024)
 
-        msg = str(UsersList[pos][0]) + ' :' + msg.decode('utf-8')
+        msg, temp = connect.recvfrom(16384)
+        brodcastmsg = user + ' :' + msg.decode('utf-8')
 
-        for i in range(len(clientsaddr)):
-            clientscon[i].sendto(bytes(msg, 'utf-8'), clientsaddr[i])
+        if "Send :" in brodcastmsg:
+            for i in range(len(salas[salaindex][0])):
+                salas[salaindex][i][0].sendto(bytes(msg.decode('utf-8'), 'utf-8'), salas[salaindex][i][0])
+        else:
+            for i in range(len(salas[salaindex][0])):
+                salas[salaindex][i][0].sendto(bytes(brodcastmsg, 'utf-8'), salas[salaindex][i][1])
 
     mainmenu(addr, connect)
 
@@ -95,7 +107,7 @@ def exclui_sala(addr, connect):
     now = datetime.datetime.now()
     with open('log.csv', 'a') as log:
         writerlog = csv.writer(log)
-        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Sala Excluida :" + nomesaladel.decode('utf-8')])
+        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M") + " : Sala Excluida :" + nomesaladel.decode('utf-8')])
 
     mainmenu(addr, connect)
 
@@ -129,7 +141,7 @@ def cria_sala(addr, connect):
     now = datetime.datetime.now()
     with open('log.csv', 'a') as log:
         writerlog = csv.writer(log)
-        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Sala Criada :" + nomesala.decode('utf-8')])
+        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M") + " : Sala Criada :" + nomesala.decode('utf-8')])
 
     mainmenu(addr, connect)
 
@@ -157,12 +169,13 @@ def registrar_usuario(addr, connect):
     now = datetime.datetime.now()
     with open('log.csv', 'a') as log:
         writerlog = csv.writer(log)
-        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Usuario Registrado :" + nomeusuario.decode('utf-8')])
+        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M") + " : Usuario Registrado :" + nomeusuario.decode('utf-8')])
 
     mainmenu(addr, connect)
 
 
 def usuario_entrar(addr, connect):
+    global user
     # pede input ao cliente
     str_return = '01'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
@@ -174,7 +187,8 @@ def usuario_entrar(addr, connect):
     nomeusuario, temp = connect.recvfrom(1024)
     senhausuario, temp = connect.recvfrom(1024)
 
-    str_return = '11'
+    # avisa output ao cliente
+    str_return = '00'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     pos = 0
@@ -196,9 +210,10 @@ def usuario_entrar(addr, connect):
     now = datetime.datetime.now()
     with open('log.csv', 'a') as log:
         writerlog = csv.writer(log)
-        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M")+" : Login de usuario :" + nomeusuario.decode('utf-8')])
+        writerlog.writerow([now.strftime("%Y-%m-%d %H:%M") + " : Login de usuario :" + nomeusuario.decode('utf-8')])
 
-    mainmenu(addr, connect)
+    user = nomeusuario.decode('utf-8')
+    return user
     '''
 
     # verificar credenciais
@@ -239,11 +254,13 @@ def main():
     global clientsaddr
     global UsersList
     global salas
+    global salapublica
 
     trds = []
     clientscon = []
     clientsaddr = []
     UsersList = []
+    salapublica = []
 
     for i in range(5):
         connect, addr = s.accept()
@@ -270,6 +287,7 @@ def main():
 
 def mainmenu(addr, connect):
     # pede input ao cliente
+    global user
     str_return = '11'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
@@ -284,7 +302,8 @@ def mainmenu(addr, connect):
         registrar_usuario(addr, connect)
 
     if str_recv == '2':
-        usuario_entrar(addr, connect)
+        user = usuario_entrar(addr, connect)
+        mainmenu(addr, connect)
 
     if str_recv == '3':
         cria_sala(addr, connect)
@@ -296,7 +315,7 @@ def mainmenu(addr, connect):
         exclui_sala(addr, connect)
 
     if str_recv == '6':
-        entra_sala(addr, connect)
+        entra_sala(addr, connect,user )
 
     if str_recv == '7':
         entra_sala_publica(addr, connect)
