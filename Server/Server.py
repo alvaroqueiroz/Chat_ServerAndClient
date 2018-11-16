@@ -35,6 +35,9 @@ def entra_sala_publica(addr, connect):
         msg, temp = connect.recvfrom(16384)
         brodcastmsg = str(nomeuser.decode('utf-8')) + ' :' + msg.decode('utf-8')
 
+        if "Exit Chat" in brodcastmsg:
+            break
+
         if "Send :" in brodcastmsg:
             for i in range(len(salapublica)):
                 salapublica[i][1].sendto(bytes(msg.decode('utf-8'), 'utf-8'), salapublica[i][0])
@@ -80,13 +83,15 @@ def entra_sala(addr, connect, user):
         msg, temp = connect.recvfrom(16384)
         brodcastmsg = user + ' :' + msg.decode('utf-8')
 
+        if "Exit Chat" in brodcastmsg:
+            break
+
         if "Send :" in brodcastmsg:
             for i in range(len(salas[salaindex][0])):
                 salas[salaindex][i][0].sendto(bytes(msg.decode('utf-8'), 'utf-8'), salas[salaindex][i][0])
         else:
             for i in range(len(salas[salaindex][0])):
                 salas[salaindex][i][0].sendto(bytes(brodcastmsg, 'utf-8'), salas[salaindex][i][1])
-
     mainmenu(addr, connect)
 
 
@@ -119,8 +124,11 @@ def lista_salas(addr, connect):
 
     # envia output ao cliente
 
-    salasresp = (','.join(salas) + '\n')
-    str_return = ('Salas abertas :' + salasresp)
+    salasresp = ''
+    for i in range(len(salas)):
+        salasresp = salasresp + salas[i] + ', possui : ' + str(len(salas[i][0])) + '  usuarios \n'
+
+    str_return = ('Salas abertas :' + salasresp + '\n programa encerrado')
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     mainmenu(addr, connect)
@@ -315,7 +323,7 @@ def mainmenu(addr, connect):
         exclui_sala(addr, connect)
 
     if str_recv == '6':
-        entra_sala(addr, connect,user )
+        entra_sala(addr, connect, user)
 
     if str_recv == '7':
         entra_sala_publica(addr, connect)

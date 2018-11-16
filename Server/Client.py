@@ -50,6 +50,10 @@ def output_data():
 def tenviafunc():
     while True:
         str_send = input()
+
+        if "Exit Chat" in str_send:
+            break
+
         if "Send :" in str_send:
             path = str_send[6:]
             filer = open(path)
@@ -58,7 +62,7 @@ def tenviafunc():
 
         else:
             s.send(bytes(str_send, 'utf-8'))
-
+    main()
 
 def trecebefunc():
     while True:
