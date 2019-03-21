@@ -3,16 +3,16 @@ import csv
 from threading import Thread
 import datetime
 
-
+# function to enter room
 def entra_sala_publica(addr, connect):
     global clientscon
     global clientsaddr
 
-    # pede input ao cliente
+    # Asks the user for his name
     str_return = '11'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
-    str_return = "Qual o seu nome?"
+    str_return = "What is your name?"
 
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
@@ -21,12 +21,14 @@ def entra_sala_publica(addr, connect):
     nomeuser, temp = connect.recvfrom(1024)
 
     now = datetime.datetime.now()
+    
+    #writting logs
     with open('log.csv', 'a') as log:
         writerlog = csv.writer(log)
         writerlog.writerow(
             [now.strftime("%Y-%m-%d %H:%M") + " :Ausuário entrou na sala pública :" + nomeuser.decode('utf-8')])
 
-    # pede input ao cliente
+    # asks the user for message
     str_return = '111'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
@@ -34,13 +36,18 @@ def entra_sala_publica(addr, connect):
 
         msg, temp = connect.recvfrom(16384)
         brodcastmsg = str(nomeuser.decode('utf-8')) + ' :' + msg.decode('utf-8')
-
+        
+        # if there is exit chat in the user message, it will be taken out of the room
         if "Exit Chat" in brodcastmsg:
             break
+            
+            # Broadcast any users file to all in the room
 
         if "Send :" in brodcastmsg:
             for i in range(len(salapublica)):
                 salapublica[i][1].sendto(bytes(msg.decode('utf-8'), 'utf-8'), salapublica[i][0])
+                
+                # broadcast message
         else:
             for i in range(len(salapublica)):
                 salapublica[i][1].sendto(bytes(brodcastmsg, 'utf-8'), salapublica[i][0])
@@ -52,29 +59,32 @@ def entra_sala(addr, connect, user):
     global clientscon
     global clientsaddr
 
-    # pede input ao cliente
+    # asks the client for a room for him to enter
     str_return = '11'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
-    str_return = "Digite o nome da sala em que deseja entrar"
+    str_return = "What's name of the room you want to enter"
 
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     nomesala, temp = connect.recvfrom(1024)
 
     salaindex = salas.index(nomesala.decode('utf-8'))
+    
+    # user is added to room
 
     salas[salaindex] = []
 
     salas[salaindex].append([connect, addr, user])
 
     now = datetime.datetime.now()
+    
+    # log is written
     with open('log.csv', 'a') as log:
         writerlog = csv.writer(log)
         writerlog.writerow(
             [now.strftime("%Y-%m-%d %H:%M") + " :Ausuário entrou na sala " + nomesala.decode('utf-8') + " : " + user])
-
-    # pede input ao cliente
+    # asks for user input
     str_return = '111'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
@@ -94,7 +104,7 @@ def entra_sala(addr, connect, user):
                 salas[salaindex][i][0].sendto(bytes(brodcastmsg, 'utf-8'), salas[salaindex][i][1])
     mainmenu(addr, connect)
 
-
+#deletes room
 def exclui_sala(addr, connect):
     # pede input ao cliente
     str_return = '11'
@@ -116,7 +126,7 @@ def exclui_sala(addr, connect):
 
     mainmenu(addr, connect)
 
-
+#show all rooms
 def lista_salas(addr, connect):
     # avisa output ao cliente
     str_return = '11'
@@ -133,7 +143,7 @@ def lista_salas(addr, connect):
 
     mainmenu(addr, connect)
 
-
+#create new room
 def cria_sala(addr, connect):
     # pede input ao cliente
     str_return = '11'
@@ -153,7 +163,7 @@ def cria_sala(addr, connect):
 
     mainmenu(addr, connect)
 
-
+# register user
 def registrar_usuario(addr, connect):
     # pede input ao cliente
     str_return = '01'
@@ -181,7 +191,7 @@ def registrar_usuario(addr, connect):
 
     mainmenu(addr, connect)
 
-
+# user login
 def usuario_entrar(addr, connect):
     global user
     # pede input ao cliente
@@ -224,7 +234,7 @@ def usuario_entrar(addr, connect):
     return user
     '''
 
-    # verificar credenciais
+    # verify credentials
 
     with open('usuarios.csv', 'r') as usuarios:
         reader = csv.reader(usuarios, delimiter=',', quotechar='"')
@@ -269,6 +279,8 @@ def main():
     clientsaddr = []
     UsersList = []
     salapublica = []
+    
+    # Server will accept up to 5 users
 
     for i in range(5):
         connect, addr = s.accept()
@@ -280,7 +292,7 @@ def main():
             writerlog = csv.writer(log)
             writerlog.writerow([now.strftime("%Y-%m-%d %H:%M") + " :Conexão recebida :" + str(addr)])
 
-        str_return = "Bem vindo a esta porra de chat"
+        str_return = "Welcome"
         connect.sendto(bytes(str_return, 'utf-8'), addr)
         clientscon.append(connect)
         clientsaddr.append(addr)
@@ -294,13 +306,13 @@ def main():
 
 
 def mainmenu(addr, connect):
-    # pede input ao cliente
+    # asks user for option
     global user
     str_return = '11'
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
-    str_return = "Menu de opcoes :\n 1 - Registrar\n 2 - Entrar\n 3 - Criar sala de bate papo\n 4 - Listar salas " \
-                 "abertas\n 5 - Excluir sala\n 6 - Entrar em sala\n 7 - Entrar em sala publica "
+    str_return = "Options menu :\n 1 - Register\n 2 - Enter\n 3 - Create new room\n 4 - List Open " \
+                 "Rooms\n 5 - Exclude Room\n 6 - Enter Room\n 7 - Enter public room "
     connect.sendto(bytes(str_return, 'utf-8'), addr)
 
     str_recv, temp = connect.recvfrom(1024)
@@ -330,7 +342,11 @@ def mainmenu(addr, connect):
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+#the ip must be your machines, the port can be any free one
 s.bind(('192.168.15.181', 3333))
+
+#Server will accept up to 5 users
 s.listen(5)
 salas = []
 main()
