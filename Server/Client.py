@@ -5,10 +5,10 @@ from threading import Thread
 def main():
     while True:
 
-        # ve se o servidor quer input ou output
+        # see if the server requires input or output
         str_recv = s.recv(1024)
 
-        # 11 para input 00 para output do servidor
+        # 11 for input 00 for output
 
         if str_recv.decode('utf-8') == '11':
             input_data()
@@ -24,6 +24,8 @@ def main():
 
 
 def input_login():
+    
+    # in this case, client wil receive messa and display it, then will send two string, login and pass
     str_recv = s.recv(4096)
     print(str_recv.decode('utf-8'))
 
@@ -50,10 +52,13 @@ def output_data():
 def tenviafunc():
     while True:
         str_send = input()
+        
+        #command Exit Chat will exit chat
 
         if "Exit Chat" in str_send:
             break
-
+            
+        # the command Send will send archive in the addr after send command, like Send:C/stuff.pdf
         if "Send :" in str_send:
             path = str_send[6:]
             filer = open(path)
@@ -75,7 +80,7 @@ def trecebefunc():
         else:
             print(str_recv)
 
-
+# when we enter an room, we will create two threads, one will be showing us the messages we receive, the other will be sending our messages
 def entrar_sala():
     trds = []
 
@@ -90,8 +95,9 @@ def entrar_sala():
     tenvia.join()
     trecebe.join()
 
-
+# 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# this must be the ip of the machine you are using, the port can be any free
 s.connect(('192.168.15.181', 3333))
 
 str_recv = s.recv(1024)
