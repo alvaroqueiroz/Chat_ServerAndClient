@@ -1,6 +1,6 @@
 # Chat Server And Client
 
-Um mensageiro instantâneo ou comunicador instantâneo, também conhecido por IM (do inglês Instant Messaging), é uma aplicação que permite o envio e o recebimento de mensagens de texto em tempo real.
+This code was written in hurry and without care, as assignement for a course at University. That code is hard to read and unprofessional, but i decided to keep it here as it may be of use to someone, someday.
 
 In the present work, it is desired to implement an online chat, this will be done through the implementation of 2 main codes, the Server and the Client, that will exchange messages through the use of Sockets, the programming language chosen for the implementation will be Python 3.6. In addition to Sockets, it will be necessary to use Threads, both on the Server and on the client, this is necessary in the Server so that it can handle several clients at the same time, and in the client so that it can receive and send messages at the same time
 
